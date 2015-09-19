@@ -2,58 +2,50 @@
  * @author alteredq / http://alteredqualia.com/
  */
 
-THREE.ShaderPass = function ( shader, textureID ) {
+ THREE.ShaderPass = function ( shader, textureID ) {
 
-	this.textureID = ( textureID !== undefined ) ? textureID : "tDiffuse";
+ 	this.textureID = ( textureID !== undefined ) ? textureID : "tDiffuse";
 
-	this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+ 	this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
 
-	this.material = new THREE.ShaderMaterial( {
+ 	this.material = new THREE.ShaderMaterial( {
 
-        	defines: shader.defines || {},
-		uniforms: this.uniforms,
-		vertexShader: shader.vertexShader,
-		fragmentShader: shader.fragmentShader
+ 		uniforms: this.uniforms,
+ 		vertexShader: shader.vertexShader,
+ 		fragmentShader: shader.fragmentShader
 
-	} );
+ 	} );
 
-	this.renderToScreen = false;
+ 	this.renderToScreen = false;
 
-	this.enabled = true;
-	this.needsSwap = true;
-	this.clear = false;
+ 	this.enabled = true;
+ 	this.needsSwap = true;
+ 	this.clear = false;
 
+ };
 
-	this.camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 );
-	this.scene  = new THREE.Scene();
+ THREE.ShaderPass.prototype = {
 
-	this.quad = new THREE.Mesh( new THREE.PlaneBufferGeometry( 2, 2 ), null );
-	this.scene.add( this.quad );
+ 	render: function ( renderer, writeBuffer, readBuffer, delta ) {
 
-};
+ 		if ( this.uniforms[ this.textureID ] ) {
 
-THREE.ShaderPass.prototype = {
+ 			this.uniforms[ this.textureID ].value = readBuffer;
 
-	render: function ( renderer, writeBuffer, readBuffer, delta ) {
+ 		}
 
-		if ( this.uniforms[ this.textureID ] ) {
+ 		THREE.EffectComposer.quad.material = this.material;
 
-			this.uniforms[ this.textureID ].value = readBuffer;
+ 		if ( this.renderToScreen ) {
 
-		}
+ 			renderer.render( THREE.EffectComposer.scene, THREE.EffectComposer.camera );
 
-		this.quad.material = this.material;
+ 		} else {
 
-		if ( this.renderToScreen ) {
+ 			renderer.render( THREE.EffectComposer.scene, THREE.EffectComposer.camera, writeBuffer, this.clear );
 
-			renderer.render( this.scene, this.camera );
+ 		}
 
-		} else {
+ 	}
 
-			renderer.render( this.scene, this.camera, writeBuffer, this.clear );
-
-		}
-
-	}
-
-};
+ };

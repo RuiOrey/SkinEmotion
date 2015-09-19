@@ -2,24 +2,24 @@
  * @author alteredq / http://alteredqualia.com/
  */
 
-THREE.MaskPass = function ( scene, camera ) {
+ THREE.MaskPass = function ( scene, camera ) {
 
-	this.scene = scene;
-	this.camera = camera;
+ 	this.scene = scene;
+ 	this.camera = camera;
 
-	this.enabled = true;
-	this.clear = true;
-	this.needsSwap = false;
+ 	this.enabled = true;
+ 	this.clear = true;
+ 	this.needsSwap = false;
 
-	this.inverse = false;
+ 	this.inverse = false;
 
-};
+ };
 
-THREE.MaskPass.prototype = {
+ THREE.MaskPass.prototype = {
 
-	render: function ( renderer, writeBuffer, readBuffer, delta ) {
+ 	render: function ( renderer, writeBuffer, readBuffer, delta ) {
 
-		var context = renderer.context;
+ 		var context = renderer.context;
 
 		// don't update color or depth
 
