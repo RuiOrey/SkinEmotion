@@ -97,19 +97,35 @@
 
 	var gui;
 
-					var skinController  = {
-					scatterness: 		0,
+				var skinController  = {
+					cheeks: 0.1,
+					neck: 0.1,
+					chin: 0.1,
+					lips: 0.1,
+					forehead: 0.1,
+					nose: 0.1,
+					scatterness: 0.1,
 					roughness: 0.145,
 					specularBrightness: 0.75,
 					bumpScale: 16
 				};
 
 				var matChanger = function( ) {
+					uniforms[ "uCheeks" ].value = skinController.cheeks;
+					uniforms[ "uNeck" ].value = skinController.neck;
+					uniforms[ "uChin" ].value = skinController.chin;
+					uniforms[ "uLips" ].value = skinController.lips;
+					uniforms[ "uForehead" ].value = skinController.forehead;
+					uniforms[ "uNose" ].value = skinController.nose;
 					uniforms[ "uScatterness" ].value = skinController.scatterness;
 					uniforms[ "uRoughness" ].value =skinController.roughness;
 					uniforms[ "uSpecularBrightness" ].value = skinController.specularBrightness;
 					uniforms[ "bumpScale" ].value = skinController.bumpScale;
+					
 				};
+
+
+
 
 
 
@@ -282,12 +298,28 @@
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				window.addEventListener( 'resize', onWindowResize, false );
 
-												gui = new dat.GUI();
-				gui.add( skinController, "scatterness", 0.0, 0.4, 0.001 ).onChange(matChanger);
+				gui = new dat.GUI();
+
+
+				
+
+				gui.add( skinController, "scatterness", 0.0, 0.1, 0.001 ).onChange(matChanger);
 				gui.add( skinController, "roughness", 0.0, 0.145, 0.0001 ).onChange(matChanger);
 				gui.add( skinController, "specularBrightness", 0.0, 1, 0.001 ).onChange(matChanger);
 				gui.add( skinController, "bumpScale", 0.0, 16, 0.1 ).onChange(matChanger);
 
+				gui.add( skinController, "cheeks", 0.0, 1.0, 001 ).onChange(matChanger);
+
+				gui.add( skinController, "neck", 0.0, 1.0, 001 ).onChange(matChanger);
+
+				gui.add( skinController, "chin", 0.0, 1.0, 001 ).onChange(matChanger);
+
+				gui.add( skinController, "lips", 0.0, 1.0, 001 ).onChange(matChanger);
+
+				gui.add( skinController, "forehead", 0.0, 1.0, 001 ).onChange(matChanger);
+
+				gui.add( skinController, "nose", 0.0, 1.0, 001 ).onChange(matChanger);
+				
 
 
 
@@ -376,11 +408,19 @@
 				uniforms[ "tDiffuse" ].value = mapColor;
 				uniforms[ "scatter1" ].value = mapScatter1 ;
 				uniforms[ "scatter2" ].value = mapScatter2;
-				uniforms[ "normal" ].value = mapNormal;
+				uniforms[ "normalT" ].value = mapNormal;
 				uniforms[ "noise" ].value = mapNoise ;
 
-				//added
-				uniforms[ "tFaceSection" ].value = mapFaceSection;
+
+				
+				uniforms[ "uScatterness" ].value = 0.4;
+				uniforms[ "uCheeks" ].value = 0.1;
+				uniforms[ "uNeck" ].value = 0.1;
+				uniforms[ "uChin" ].value = 0.1;
+				uniforms[ "uLips" ].value = 0.1;
+				uniforms[ "uForehead" ].value = 0.1;
+				uniforms[ "uNose" ].value = 0.1;
+	
 
 
 
@@ -399,7 +439,11 @@
 
 				uniforms[ "offsetRepeat" ].value.set( 0.001, 0.001, 0.998, 0.998 );
 
-				uniforms[ "uScatterness" ].value = 0.1;
+				//added
+				uniforms[ "tFaceSection" ].value = mapFaceSection;
+
+
+
 
 
 

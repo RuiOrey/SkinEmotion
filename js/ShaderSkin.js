@@ -35,7 +35,7 @@ THREE.ShaderSkin = {
 
 			"tDiffuse"	: { type: "t", value: null },
 			"tBeckmann"	: { type: "t", value: null },
-			"normal"	: { type: "t", value: null },
+			"normalT"	: { type: "t", value: null },
 			"scatter1"	: { type: "t", value: null },
 			"scatter2"	: { type: "t", value: null },
 			"noise"	: { type: "t", value: null },
@@ -49,6 +49,14 @@ THREE.ShaderSkin = {
 			"uSpecularBrightness": 	{ type: "f", value: 0.75 },
 
 			"uScatterness": 	  		{ type: "f", value: 0.5 },
+
+			"uCheeks": 	  		{ type: "f", value: 0.5 },
+			"uNeck": 	  		{ type: "f", value: 0.5 },
+			"uChin": 	  		{ type: "f", value: 0.5 },
+			"uLips": 	  		{ type: "f", value: 0.5 },
+			"uForehead": 	  	{ type: "f", value: 0.5 },
+			"uNose": 	  		{ type: "f", value: 0.5 },
+
 
 			"tFaceSection"	: { type: "t", value: null },
 
@@ -89,7 +97,7 @@ THREE.ShaderSkin = {
 			"uniform sampler2D diffuse;",
 			"uniform sampler2D scatter1;",
 			"uniform sampler2D scatter2;",
-			"uniform sampler2D normal;",
+			"uniform sampler2D normalT;",
 			"uniform sampler2D noise;",
 
 
@@ -98,11 +106,14 @@ THREE.ShaderSkin = {
 			"varying vec3 vNormal;",
 			"varying vec2 vUv;",
 
+
+
 			"uniform vec3 ambientLightColor;",
 
-			
+			"varying float vScatterOn;",
 			"uniform float uScatterness;",
-			"uniform sampler2D tFaceSection;",
+			"uniform float uCheeks;",
+			
 
 			"#if MAX_DIR_LIGHTS > 0",
 
@@ -201,17 +212,15 @@ THREE.ShaderSkin = {
 
 				"vec4 colDiffuse = texture2D( tDiffuse, vUv );",
 
-				"vec4 colFaceSection = texture2D(tFaceSection,vUv);",
 
-				"vec4 whiteColor = vec4(1.00, 1.00, 1.00, 0.00);",
 
-				"float scatterOn = 0.00;",
+
 
 
 				 "vec4 Cnoise   = texture2D( noise, vUv);",
 				 "vec4 Cscatter1= texture2D( scatter1, vUv+ Cnoise.yz);",
 				 "vec4 Cscatter2= texture2D( scatter2, vUv+ Cnoise.xy);",
-				 "vec4 Cnormal  = texture2D( normal, vUv);",
+				 "vec4 Cnormal  = texture2D( normalT, vUv);",
 				 "vec3 fvNormal = normalize( ( Cnormal.xyz * 2.0 ) - 1.0 );",
 
 				 "colDiffuse = GammaCorrection(colDiffuse);",
@@ -224,13 +233,8 @@ THREE.ShaderSkin = {
 				 "float fresnelPower = 1.30;",
 
 
-				"if ( colFaceSection.xyz != whiteColor.xyz ) {",
 
-				"scatterOn = 1.0 - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
-
-				"}",
-
-				"vec4 temp_color = colDiffuse * 0.5 + 0.0*scatterOn*Cscatter1*uScatterness + Cscatter2 *0.1;",
+				"vec4 temp_color = colDiffuse * 0.5 + 0.1*vScatterOn*Cscatter2*uScatterness + Cscatter1 *0.4;",
 
 				"//colDiffuse.rgb *= colDiffuse.rgb;",
 
@@ -251,9 +255,9 @@ THREE.ShaderSkin = {
 
 
 	
-"vec4 ambient_color = (colDiffuse *0.5* Fresnel * fvAmbient + 0.4 * Cscatter1 * Fresnel * fvAmbient + uScatterness * scatterOn * Cscatter2 * Fresnel * fvAmbient );",
-"vec4 diffuse_color = ((colDiffuse *0.5 * Fresnel * fvDiffuse * fvLightColor + 0.4 * Cscatter1 * Fresnel * fvDiffuse *fvLightColor + scatterOn * uScatterness * Cscatter2 * Fresnel * fvDiffuse *fvLightColor) );",
-"vec4 specular_color = (colDiffuse *0.5 * fvSpecular + 0.4 * Cscatter1 * Fresnel * fvSpecular + scatterOn * uScatterness * Cscatter2 * Fresnel * fvSpecular );",
+"vec4 ambient_color = (colDiffuse *0.5* Fresnel * fvAmbient + 0.4 * Cscatter1 * Fresnel * fvAmbient + uScatterness * vScatterOn * Cscatter2 * Fresnel * fvAmbient );",
+"vec4 diffuse_color = ((colDiffuse *0.5 * Fresnel * fvDiffuse * fvLightColor + 0.4 * Cscatter1 * Fresnel * fvDiffuse *fvLightColor + vScatterOn * uScatterness * Cscatter2 * Fresnel * fvDiffuse *fvLightColor) );",
+"vec4 specular_color = (colDiffuse *0.5 * fvSpecular + 0.4 * Cscatter1 * Fresnel * fvSpecular + vScatterOn * uScatterness * Cscatter2 * Fresnel * fvSpecular );",
 
 
 				"gl_FragColor = gl_FragColor * temp_color * (ambient_color + diffuse_color + specular_color);",
@@ -404,9 +408,35 @@ THREE.ShaderSkin = {
 
 			"varying vec3 vViewPosition;",
 
+			"uniform sampler2D tFaceSection;",
+
+
+			"varying float vScatterOn;",
+
+			
+			"uniform float uCheeks;",
+			"uniform float uNeck;",
+			"uniform float uChin;",
+			"uniform float uLips;",
+			"uniform float uForehead;",
+			"uniform float uNose;",
+			"uniform float uScatterness;",	  
+	  
+
+			"vec4 cheeksColor = vec4(1.00, 100.00/255.00, 0.00, 0.00);",
+			"vec4 neckColor = vec4(0.00/255.00, 254.00/255.00, 2.00/255.00, 0.00);",
+			"vec4 chinColor = vec4(1.00, 0.0, 0.00, 0.00);",
+			"vec4 lipsColor = vec4(254.00/255.00, 254.00/255.0,8.00/255.0, 0.00);",
+			"vec4 foreheadColor = vec4(1.00/255.00, 1.00,1.00, 0.00);",
+			"vec4 noseColor = vec4(199.00/255.00, 0.00/255.00, 253.00/255.00, 0.00);",
+
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main() {",
+
+				
+						
+
 
 				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 				"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
@@ -416,6 +446,79 @@ THREE.ShaderSkin = {
 				"vNormal = normalize( normalMatrix * normal );",
 
 				"vUv = uv * offsetRepeat.zw + offsetRepeat.xy;",
+
+				"vScatterOn = 0.00;",
+
+				"vec4 colFaceSection = texture2D(tFaceSection,vUv);",
+
+
+				"if ( colFaceSection.xyz == cheeksColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uCheeks;",
+				
+					
+				"}",
+
+
+				"if ( colFaceSection.xyz == cheeksColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uCheeks;",
+				
+					
+				"}",
+
+
+				"if ( colFaceSection.xyz == neckColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uNeck;",
+				
+					
+				"}",
+
+
+				"if ( colFaceSection.xyz == chinColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uChin;",
+				
+					
+				"}",
+
+
+				"if ( colFaceSection.xyz == lipsColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uLips;",
+				
+					
+				"}",
+
+
+				"if ( colFaceSection.xyz == foreheadColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uForehead;",
+				
+					
+				"}",
+				"if ( colFaceSection.xyz == noseColor.xyz  ) {",
+					
+					
+						"vScatterOn = vScatterOn + 1.0  - (min(colFaceSection.x , min (colFaceSection.y, colFaceSection.z )) / (1.0));",
+						"vScatterOn = vScatterOn *	uNose;",
+				
+					
+				"}",
+
 
 				"gl_Position = projectionMatrix * mvPosition;",
 
@@ -473,7 +576,14 @@ THREE.ShaderSkin = {
 			"uRoughness": 	  		{ type: "f", value: 0.15 },
 			"uSpecularBrightness": 	{ type: "f", value: 0.75 },
 
-			"uScatterness": 	  		{ type: "f", value: 0.5 }
+			"uScatterness": 	  		{ type: "f", value: 0.5 },
+
+			"uCheeks": 	  		{ type: "f", value: 0.5 },
+			"uNeck": 	  		{ type: "f", value: 0.5 },
+			"uChin": 	  		{ type: "f", value: 0.5 },
+			"uLips": 	  		{ type: "f", value: 0.5 },
+			"uForehead": 	  	{ type: "f", value: 0.5 },
+			"uNose": 	  		{ type: "f", value: 0.5 }
 
 			}
 
@@ -584,7 +694,7 @@ THREE.ShaderSkin = {
 				"mat3 tsb = mat3( vTangent, vBinormal, vNormal );",
 				"vec3 finalNormal = tsb * normalTex;",
 
-				"vec3 normal = normalize( finalNormal );",
+				"vec3 normalv = normalize( finalNormal );",
 				"vec3 viewPosition = normalize( vViewPosition );",
 
 				// point lights
@@ -600,12 +710,12 @@ THREE.ShaderSkin = {
 						"vec3 pointVector = normalize( vPointLight[ i ].xyz );",
 						"float pointDistance = vPointLight[ i ].w;",
 
-						"float pointDiffuseWeight = max( dot( normal, pointVector ), 0.0 );",
+						"float pointDiffuseWeight = max( dot( normalv, pointVector ), 0.0 );",
 
 						"pointTotal  += pointDistance * vec4( pointLightColor[ i ], 1.0 ) * ( mColor * pointDiffuseWeight );",
 
 						"if ( passID == 1 )",
-							"specularTotal += pointDistance * mSpecular.xyz * pointLightColor[ i ] * KS_Skin_Specular( normal, pointVector, viewPosition, uRoughness, uSpecularBrightness );",
+							"specularTotal += pointDistance * mSpecular.xyz * pointLightColor[ i ] * KS_Skin_Specular( normalv, pointVector, viewPosition, uRoughness, uSpecularBrightness );",
 
 					"}",
 
@@ -623,12 +733,12 @@ THREE.ShaderSkin = {
 
 						"vec3 dirVector = normalize( lDirection.xyz );",
 
-						"float dirDiffuseWeight = max( dot( normal, dirVector ), 0.0 );",
+						"float dirDiffuseWeight = max( dot( normalv, dirVector ), 0.0 );",
 
 						"dirTotal  += vec4( directionalLightColor[ i ], 1.0 ) * ( mColor * dirDiffuseWeight );",
 
 						"if ( passID == 1 )",
-							"specularTotal += mSpecular.xyz * directionalLightColor[ i ] * KS_Skin_Specular( normal, dirVector, viewPosition, uRoughness, uSpecularBrightness );",
+							"specularTotal += mSpecular.xyz * directionalLightColor[ i ] * KS_Skin_Specular( normalv, dirVector, viewPosition, uRoughness, uSpecularBrightness );",
 
 					"}",
 
