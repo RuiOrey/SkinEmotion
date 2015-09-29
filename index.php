@@ -47,7 +47,7 @@
 	</div>
 -->
 <audio id="myAudio" src="sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3"></audio>
-	<script src="../build/three.min.js"></script>
+	<script src="build/three.min.js"></script>
 
 	<script src="js/ShaderSkin.js"></script>
 
