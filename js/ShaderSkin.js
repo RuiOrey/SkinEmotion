@@ -57,6 +57,8 @@ THREE.ShaderSkin = {
 			"uForehead": 	  	{ type: "f", value: 0.5 },
 			"uNose": 	  		{ type: "f", value: 0.5 },
 
+			"uSine": 	  { type: "f", value: 1 },
+
 
 			"tFaceSection"	: { type: "t", value: null },
 
@@ -234,7 +236,7 @@ THREE.ShaderSkin = {
 
 
 
-				"vec4 temp_color = colDiffuse * 0.5 + 0.1*vScatterOn*Cscatter2*uScatterness + Cscatter1 *0.4;",
+				"vec4 temp_color = colDiffuse * 0.3 + 0.03* vScatterOn*Cscatter2*uScatterness + Cscatter1 *0.2;",
 
 				"//colDiffuse.rgb *= colDiffuse.rgb;",
 
@@ -420,28 +422,26 @@ THREE.ShaderSkin = {
 			"uniform float uLips;",
 			"uniform float uForehead;",
 			"uniform float uNose;",
-			"uniform float uScatterness;",	  
+			"uniform float uScatterness;",	 
+
+			"uniform float uSine;",	 
 	  
 
-			"vec4 cheeksColor = vec4(1.00, 100.00/255.00, 0.00, 0.00);",
-			"vec4 neckColor = vec4(0.00/255.00, 254.00/255.00, 2.00/255.00, 0.00);",
-			"vec4 chinColor = vec4(1.00, 0.0, 0.00, 0.00);",
-			"vec4 lipsColor = vec4(254.00/255.00, 254.00/255.0,8.00/255.0, 0.00);",
+			"vec4 cheeksColor = vec4(0.00, 0.00, 254.00/255.00, 0.00);",
+			"vec4 neckColor = vec4(0.00/255.00, 255.00/255.00, 1.00/255.00, 0.00);",
+			"vec4 chinColor = vec4(254.00/255.00, 0.0, 0.00, 0.00);",
+			"vec4 lipsColor = vec4(255.00/255.00, 255.00/255.0,1.00/255.0, 0.00);",
 			"vec4 foreheadColor = vec4(1.00/255.00, 1.00,1.00, 0.00);",
-			"vec4 noseColor = vec4(199.00/255.00, 0.00/255.00, 253.00/255.00, 0.00);",
+			"vec4 noseColor = vec4(255.00/255.00, 0.00/255.00, 255.00/255.00, 0.00);",
 
 			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main() {",
 
-				
-						
+				 		
 
 
-				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-				"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
 
-				"vViewPosition = -mvPosition.xyz;",
 
 				"vNormal = normalize( normalMatrix * normal );",
 
@@ -451,6 +451,18 @@ THREE.ShaderSkin = {
 
 				"vec4 colFaceSection = texture2D(tFaceSection,vUv);",
 
+				"float testSound =  uSine + position.y * position.x  * position.z;",
+
+				"float c = pow(-1.00 , testSound);",
+				"vec3 b = c * vNormal * uSine /300.00;",
+
+
+
+				"vec4 mvPosition = modelViewMatrix * vec4( position.x   ,position.y  ,position.z , 1.0  );",
+				"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
+
+								"vViewPosition = -mvPosition.xyz;",
+				
 
 				"if ( colFaceSection.xyz == cheeksColor.xyz  ) {",
 					
@@ -520,7 +532,7 @@ THREE.ShaderSkin = {
 				"}",
 
 
-				"gl_Position = projectionMatrix * mvPosition;",
+				"gl_Position =    projectionMatrix * mvPosition  ;",
 
 				THREE.ShaderChunk[ "shadowmap_vertex" ],
 
