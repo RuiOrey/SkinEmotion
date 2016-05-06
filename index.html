@@ -46,7 +46,8 @@
 		<a href="http://www.ir-ltd.net/infinite-3d-head-scan-released/" target="_blank">Lee Perry-Smith</a> head
 	</div>
 -->
-	<script src="../build/three.min.js"></script>
+<audio id="myAudio" src="sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3"></audio>
+	<script src="build/three.min.js"></script>
 
 	<script src="js/ShaderSkin.js"></script>
 
@@ -65,6 +66,14 @@
 	<script src="js/controls/TrackballControls.js"></script>
 
 	<script>
+/*
+	var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+	var analyser = audioCtx.createAnalyser();
+
+	source = audioCtx.createMediaStreamSource("sounds/376737_Skullbeatz___Bad_Cat_Maste.mp3");
+	source.connect(analyser);
+	analyser.connect(distortion);
+*/
 
 	if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
@@ -97,44 +106,351 @@
 
 	var gui;
 
-				var skinController  = {
-					cheeks: 0.1,
-					neck: 0.1,
-					chin: 0.1,
-					lips: 0.1,
-					forehead: 0.1,
-					nose: 0.1,
-					scatterness: 0.1,
-					roughness: 0.145,
-					specularBrightness: 0.75,
-					bumpScale: 16
-				};
-
-				var matChanger = function( ) {
-					uniforms[ "uCheeks" ].value = skinController.cheeks;
-					uniforms[ "uNeck" ].value = skinController.neck;
-					uniforms[ "uChin" ].value = skinController.chin;
-					uniforms[ "uLips" ].value = skinController.lips;
-					uniforms[ "uForehead" ].value = skinController.forehead;
-					uniforms[ "uNose" ].value = skinController.nose;
-					uniforms[ "uScatterness" ].value = skinController.scatterness;
-					uniforms[ "uRoughness" ].value =skinController.roughness;
-					uniforms[ "uSpecularBrightness" ].value = skinController.specularBrightness;
-					uniforms[ "bumpScale" ].value = skinController.bumpScale;
-					
-				};
 
 
+	/*-------------------
+
+	SOUND TEST
+
+	-------------------*/
+
+	var musicURL = "sounds/376737_Skullbeatz___Bad_Cat_Masste.mp3";
+
+	var listener;
+
+	var analyser;
+
+	var analyserReady = false;
+
+	var audioSource;
+
+	var context;
+
+	var musicBuffer;
+
+	var source;
+
+	var gainNode;  // volume
+
+	var javascriptNode;
+
+	var array ;	
+	
+	window.addEventListener('load', initSound, false);
+	
+	function initSound() {
+	  try {
+	    
+	    // Fix up for prefixing
+	    window.AudioContext = window.AudioContext||window.webkitAudioContext;
+	    
+	    context = new AudioContext();
+
+		analyser = context.createAnalyser();
+
+		//analyser.smoothingTimeConstant = 0.3;
+
+		analyser.minDecibels = -1024;
+
+		analyser.maxDecibels = 1000;
+
+		analyser.fftSize = 1024;
+
+		array =  new Uint8Array(analyser.frequencyBinCount);
+
+		
+
+	    javascriptNode = context.createScriptProcessor(2048, 1, 1);
+
+
+    javascriptNode.onaudioprocess = function() {
+
+	    // get the average, bincount is fftsize / 2
+        var array =  new Uint8Array(analyser.frequencyBinCount);
+    
+        analyser.getByteFrequencyData(array);
+    
+        var average = getAverageVolume(array)
+ 
+    	//console.log(average);
+    	
+    }
+
+	    
+
+	  }
+	  catch(e) {
+	    alert('Web Audio API is not supported in this browser');
+	  }
+	}
+	function playSound(buffer) {
+
+
+		
+			source = context.createBufferSource(); // creates a sound source
+
+			source.buffer = buffer;                    // tell the source which sound to play
+
+			source.connect(context.destination);       // connect the source to the context's destination (the speakers)
+
+          	// Create a gain node.
+			gainNode = context.createGain();
+			
+        	source.connect(analyser);
+
+        	analyser.connect(context.destination);
+
+
+			// Connect the source to the gain node.
+			source.connect(gainNode);
+			// Connect the gain node to the destination.
+			gainNode.connect(context.destination);
+
+			gainNode.gain.value = 0;
+          	
+        	source.start(0);          	// play the source now
+            						 	// note: on older systems, may have to use deprecated noteOn(time);
+
+
+
+			analyserReady = true;
+
+
+
+			
+			}
+
+	    function getAverageVolume(array) {
+
+			var values = 0;
+
+			var average;
+
+			var length = array.length;
+
+			// get all the frequency amplitudes
+			for (var i = 0; i < length; i++) {
+
+			    values += array[i];
+
+			}
+
+			average = values / length;
+
+			return average;
+    
+    }
+
+    function loadMusic(url) {
+			
+			var request = new XMLHttpRequest();
+			
+			request.open('GET', url, true);
+
+			request.responseType = 'arraybuffer';
+
+			// Decode asynchronously
+			request.onload = function() {
+				
+				context.decodeAudioData(request.response, function(buffer) {
+				  
+				  musicBuffer = buffer;
+
+				  playSound(musicBuffer);
+
+
+				});
+			}
+		request.send();
+	}
+
+	var happy = {
+
+		cheeks: 3.7,
+		chin: 4.4,
+		lips: 3.5,
+		neck: 2.0,		
+		forehead: 2.7,
+		nose: 2.2
+		
+
+	}
+
+	var afterExercise = {
+
+		cheeks: 1.7,
+		chin: 1.9,
+		lips: 1.8,
+		neck: 3.0,		
+		forehead: 1.7,
+		nose: 0.0
+
+
+	}
+
+	var fear = {
+
+		cheeks: 2.2,
+		chin: 1.7,
+		lips: 2.2,
+		neck: 1.5,		
+		forehead: 0.0,
+		nose: 0.0
+
+	}
+
+	var anger = {
+
+		cheeks: 2.6,
+		chin: 2.4,
+		lips: 0.0,
+		neck: 1.9,		
+		forehead: 0.0,
+		nose: 0.0
+
+	}
+
+	var disgust = {
+
+		cheeks: 3.1,
+		chin: 3,
+		lips: 2.5,
+		neck: 1.8,		
+		forehead: 0.0,
+		nose: 0.0
+
+	}
+
+	var neutral = {
+
+		cheeks: 0.0,
+		chin: 0.0,
+		lips: 0.0,
+		neck: 0.0,		
+		forehead: 0.0,
+		nose: 0.0
+
+	}
+
+	var emotionController = {
+
+		afterExercise: 0.0,
+		fear: 0.0,
+		anger: 0.0,
+		disgust: 0.0,
+		happy: 0.0
+
+	}
+
+	var skinController  = {
+
+		cheeks: 1.0,
+		neck: 1.0,
+		chin: 1.0,
+		lips: 1.0,
+		forehead: 1.0,
+		nose: 1.0,
+		scatterness: 0.1,
+		roughness: 0.145,
+		specularBrightness: 0.75,
+		bumpScale: 16,
+		gammaCorrection:1.0
+
+	};
+
+	var matChanger = function( ) {
+
+		//gets the maximum for each face part
+
+
+		var cheeksValue = Math.max.apply(null, [
+													emotionController.afterExercise * afterExercise.cheeks ,
+													emotionController.fear * fear.cheeks ,
+													emotionController.anger * anger.cheeks ,
+													emotionController.disgust * disgust.cheeks ,
+													emotionController.happy * happy.cheeks 
+
+													]); 
+
+
+		var foreheadValue = Math.max.apply(null, [
+													emotionController.afterExercise * afterExercise.forehead ,
+													emotionController.fear * fear.forehead ,
+													emotionController.anger * anger.forehead ,
+													emotionController.disgust * disgust.forehead ,
+													emotionController.happy * happy.forehead 
+
+													]); 
+
+		var chinValue = Math.max.apply(null, [
+													emotionController.afterExercise * afterExercise.chin ,
+													emotionController.fear * fear.chin ,
+													emotionController.anger * anger.chin ,
+													emotionController.disgust * disgust.chin ,
+													emotionController.happy * happy.chin 
+
+													]); 
+
+		var lipsValue = Math.max.apply(null, [
+													emotionController.afterExercise * afterExercise.lips ,
+													emotionController.fear * fear.lips ,
+													emotionController.anger * anger.lips ,
+													emotionController.disgust * disgust.lips ,
+													emotionController.happy * happy.lips 
+
+													]); 
+
+		var neckValue = Math.max.apply(null, [
+													emotionController.afterExercise * afterExercise.neck ,
+													emotionController.fear * fear.neck ,
+													emotionController.anger * anger.neck ,
+													emotionController.disgust * disgust.neck ,
+													emotionController.happy * happy.neck 
+
+													]); 
+
+		var noseValue = Math.max.apply(null, [
+													emotionController.afterExercise * afterExercise.nose ,
+													emotionController.fear * fear.nose ,
+													emotionController.anger * anger.nose ,
+													emotionController.disgust * disgust.nose ,
+													emotionController.happy * happy.nose 
+
+													]); 
+
+		uniforms[ "uCheeks" ].value = skinController.cheeks * cheeksValue;
+		uniforms[ "uNeck" ].value = skinController.neck * neckValue;
+		uniforms[ "uChin" ].value = skinController.chin * chinValue;
+		uniforms[ "uLips" ].value = skinController.lips * lipsValue;
+		uniforms[ "uForehead" ].value = skinController.forehead * foreheadValue;
+		uniforms[ "uNose" ].value = skinController.nose * noseValue;
+
+		console.log(cheeksValue + " " + neckValue + " " + chinValue + " " + lipsValue + " " + foreheadValue + " " + noseValue  );
+
+
+		uniforms[ "uScatterness" ].value = skinController.scatterness;
+		uniforms[ "uRoughness" ].value =skinController.roughness;
+		uniforms[ "uSpecularBrightness" ].value = skinController.specularBrightness;
+		uniforms[ "bumpScale" ].value = skinController.bumpScale;
+		uniforms[ "gammaCorrection" ].value = skinController.gammaCorrection;
+
+	};
 
 
 
 
+
+
+
+	loadMusic(musicURL);
 
 	init();
+
 	animate();
 
 	function init() {
 
+	
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 
@@ -143,8 +459,7 @@
 				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.z = 1200;
 
-
-
+	
 
 				scene = new THREE.Scene();
 
@@ -301,30 +616,47 @@
 				gui = new dat.GUI();
 
 
+				var f0 = gui.addFolder('Shading');
+
+				f0.add( skinController, "scatterness", 0.0, 1.0, 0.001 ).onChange(matChanger);
+				f0.add( skinController, "roughness", 0.0, 0.145, 0.0001 ).onChange(matChanger);
+				f0.add( skinController, "specularBrightness", 0.0, 1, 0.001 ).onChange(matChanger);
+				f0.add( skinController, "bumpScale", 0.0, 16, 0.1 ).onChange(matChanger);
+				f0.add( skinController, "gammaCorrection", 0.0, 16, 0.1 ).onChange(matChanger);
+
+				var f1 = gui.addFolder('Face Section');
+
+				f1.add( skinController, "cheeks", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f1.add( skinController, "neck", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f1.add( skinController, "chin", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f1.add( skinController, "lips", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f1.add( skinController, "forehead", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f1.add( skinController, "nose", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				var f2 = gui.addFolder('Emotion');
+
+				f2.add( emotionController, "afterExercise", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f2.add( emotionController, "fear", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f2.add( emotionController, "anger", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f2.add( emotionController, "disgust", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+				f2.add( emotionController, "happy", 0.0, 1.0, 0.001 ).onChange(matChanger);
+
+
 				
+				f0.close();
 
-				gui.add( skinController, "scatterness", 0.0, 0.1, 0.001 ).onChange(matChanger);
-				gui.add( skinController, "roughness", 0.0, 0.145, 0.0001 ).onChange(matChanger);
-				gui.add( skinController, "specularBrightness", 0.0, 1, 0.001 ).onChange(matChanger);
-				gui.add( skinController, "bumpScale", 0.0, 16, 0.1 ).onChange(matChanger);
+				//f1.open();
 
-				gui.add( skinController, "cheeks", 0.0, 1.0, 001 ).onChange(matChanger);
-
-				gui.add( skinController, "neck", 0.0, 1.0, 001 ).onChange(matChanger);
-
-				gui.add( skinController, "chin", 0.0, 1.0, 001 ).onChange(matChanger);
-
-				gui.add( skinController, "lips", 0.0, 1.0, 001 ).onChange(matChanger);
-
-				gui.add( skinController, "forehead", 0.0, 1.0, 001 ).onChange(matChanger);
-
-				gui.add( skinController, "nose", 0.0, 1.0, 001 ).onChange(matChanger);
-				
-
-
-
-				gui.close();
-
+				f2.open();
 
 			}
 
@@ -364,10 +696,12 @@
 
 
 				var mapScatter2 = THREE.ImageUtils.loadTexture( "obj/leeperrysmith/scatter2.jpg" );
-				mapScatter2.anisotropy = 4;
+				mapScatter2.anisotropy = renderer.getMaxAnisotropy();
 				mapScatter2.repeat.set( 0.998, 0.998 );
 				mapScatter2.offset.set( 0.001, 0.001 )
 				mapScatter2.wrapS = mapColor.wrapT = THREE.RepeatWrapping;
+				mapScatter2.magFilter = THREE.NearestFilter;
+				mapScatter2.minFilter = THREE.NearestFilter;
 				mapScatter2.format = THREE.RGBFormat;
 
 				var mapNormal = THREE.ImageUtils.loadTexture( "obj/leeperrysmith/Infinite-Level_02_Tangent_NoSmoothUV_max.jpg" );
@@ -420,6 +754,8 @@
 				uniforms[ "uLips" ].value = 0.1;
 				uniforms[ "uForehead" ].value = 0.1;
 				uniforms[ "uNose" ].value = 0.1;
+
+				uniforms[ "uSine" ].value = 1.0;
 	
 
 
@@ -436,6 +772,7 @@
 				uniforms[ "uSpecularBrightness" ].value = 0.75;
 
 				uniforms[ "bumpScale" ].value = 16;
+				uniforms[ "gammaCorrection" ].value = 2.2;
 
 				uniforms[ "offsetRepeat" ].value.set( 0.001, 0.001, 0.998, 0.998 );
 
@@ -462,6 +799,8 @@
 				control = new THREE.TransformControls( camera, renderer.domElement );
 				control.addEventListener( 'change', render );
 */
+				
+
 				scene.add( mesh );
 
 				loader.statusDomElement.style.display = "none";
@@ -502,9 +841,33 @@
 
 			//
 
-			function animate() {
-				//if (uniforms !== undefined)
-				//matChanger();
+	function animate() {
+		//if (uniforms !== undefined)
+		//matChanger();
+
+		        now = new Date();
+	timeLapse = now.getTime();
+	timeLapse = timeLapse / 1000.0;
+	//     console.log(timeLapse);
+	var sine = Math.sin(timeLapse);
+
+
+    if (analyserReady)
+    {
+
+    	var array =  new Uint8Array(analyser.frequencyBinCount);
+    
+        analyser.getByteFrequencyData(array);
+    
+        var average = getAverageVolume(array)
+ 
+    //	console.log(average);
+
+
+	if (uniforms !== undefined)
+	uniforms[ "uSine" ].value = average;
+
+    }
 
 
 

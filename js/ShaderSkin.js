@@ -64,6 +64,7 @@ THREE.ShaderSkin = {
 
 			"bumpMap"	: { type: "t", value: null },
 			"bumpScale" : { type: "f", value: 1 },
+			"gammaCorrection" : { type: "f", value: 2.2 },
 
 			"specularMap" : { type: "t", value: null },
 
@@ -115,7 +116,8 @@ THREE.ShaderSkin = {
 			"varying float vScatterOn;",
 			"uniform float uScatterness;",
 			"uniform float uCheeks;",
-			
+			"uniform float gammaCorrection;",
+
 
 			"#if MAX_DIR_LIGHTS > 0",
 
@@ -193,10 +195,10 @@ THREE.ShaderSkin = {
 			"vec4 GammaCorrection (vec4 Color)",
 			"{",
 			"vec4 Final_color;",
-			"Final_color.x = pow(Color.x,2.2);",
-			"Final_color.y = pow(Color.y,2.2);",
-			"Final_color.z = pow(Color.z,2.2);",
-			"Final_color.w = pow(Color.w,2.2);",
+			"Final_color.x = pow(Color.x,gammaCorrection);",
+			"Final_color.y = pow(Color.y,gammaCorrection);",
+			"Final_color.z = pow(Color.z,gammaCorrection);",
+			"Final_color.w = pow(Color.w,gammaCorrection);",
 			"return Final_color;",
 			"}",		
 
@@ -236,7 +238,7 @@ THREE.ShaderSkin = {
 
 
 
-				"vec4 temp_color = colDiffuse * 0.3 + 0.03* vScatterOn*Cscatter2*uScatterness + Cscatter1 *0.2;",
+				"vec4 temp_color = colDiffuse * 1.0 + 0.0 * vScatterOn * Cscatter2 * uScatterness + Cscatter1 * 0.0;",
 
 				"//colDiffuse.rgb *= colDiffuse.rgb;",
 
@@ -257,12 +259,12 @@ THREE.ShaderSkin = {
 
 
 	
-"vec4 ambient_color = (colDiffuse *0.5* Fresnel * fvAmbient + 0.4 * Cscatter1 * Fresnel * fvAmbient + uScatterness * vScatterOn * Cscatter2 * Fresnel * fvAmbient );",
-"vec4 diffuse_color = ((colDiffuse *0.5 * Fresnel * fvDiffuse * fvLightColor + 0.4 * Cscatter1 * Fresnel * fvDiffuse *fvLightColor + vScatterOn * uScatterness * Cscatter2 * Fresnel * fvDiffuse *fvLightColor) );",
-"vec4 specular_color = (colDiffuse *0.5 * fvSpecular + 0.4 * Cscatter1 * Fresnel * fvSpecular + vScatterOn * uScatterness * Cscatter2 * Fresnel * fvSpecular );",
+"vec4 ambient_color = ( colDiffuse * 0.3 * Fresnel * fvAmbient + 0.6 * Cscatter1 * Fresnel * fvAmbient + 1.5 * uScatterness * vScatterOn * Cscatter2 * Fresnel * fvAmbient );",
+"vec4 diffuse_color =  ( ( colDiffuse * 0.3 * Fresnel * fvDiffuse * fvLightColor + 0.6 * Cscatter1 * Fresnel * fvDiffuse *fvLightColor + 1.5 *  vScatterOn * uScatterness * Cscatter2 * Fresnel * fvDiffuse * fvLightColor ) );",
+"vec4 specular_color =  ( colDiffuse * 0.3 * fvSpecular + 0.6 * Cscatter1 * Fresnel * fvSpecular + 1.5 *vScatterOn * uScatterness * Cscatter2 * Fresnel * fvSpecular );",
 
 
-				"gl_FragColor = gl_FragColor * temp_color * (ambient_color + diffuse_color + specular_color);",
+				"gl_FragColor = gl_FragColor * temp_color * ( ambient_color + diffuse_color + specular_color );",
 
 
 				"float specularStrength;",
@@ -610,6 +612,7 @@ THREE.ShaderSkin = {
 
 			"uniform float uRoughness;",
 			"uniform float uSpecularBrightness;",
+			"uniform float gammaCorrection;",
 
 
 			"uniform int passID;",
